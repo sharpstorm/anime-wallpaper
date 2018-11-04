@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Welcome</title>
+    <meta charset="utf-16">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <style>
+      .background-image{
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 1s;
+        height:100%;
+        width:100%;
+      }
+
+      #body-main{
+        overflow:hidden;
+        text-align:center;
+        width:100vw;
+        height:100vh;
+      }
+
+      body{
+        margin:0;
+        padding:0;
+      }
+
+      #clock{
+        font-family: Montserrat;
+        background-color: rgba(0,0,0,0.8);
+        color: white;
+        position:absolute;
+        padding: 10px;
+        top: 10%;
+        left:0;
+        right:0;
+        width:30%;
+        text-align:center;
+        border-radius: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        transition: opacity 0.5s;
+      }
+
+      #clock-time{
+        font-size: 10rem;
+      }
+
+      #clock-date{
+        font-size: 3rem;
+      }
+
+      #sauce{
+        background-color: rgba(0,0,0,0.8);
+        color: white;
+        position:absolute;
+        bottom: 2%;
+        left: 2%;
+        border-radius: 5px;
+        padding: 10px;
+        font-family: Helvetica;
+      }
+
+      @media(max-width: 768px){
+        #clock-time{
+          font-size: 5rem;
+        }
+
+        #clock-date{
+          font-size: 1.5rem;
+        }
+
+        #clock{
+          width: 70%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="body-main">
+    </div>
+    <div id="sauce">
+      <span id="sauce-title"></span>
+    </div>
+    <div id="clock" style="opacity: 1;">
+      <span id="clock-time">00:00</span><br/>
+      <span id="clock-date">Monday, 5 Nov</span>
+    </div>
+  </body>
+  <script>
+    var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dev"]
+
+    function updateTime(){
+      var d = new Date();
+      updateDate(d);
+      document.getElementById("clock-time").innerHTML = (d.getHours() < 10 ? "0" + d.getHours() : d.getHours()) + ":" + (d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes());
+      setTimeout(updateTime, 5000);
+    }
+
+    function updateDate(d){
+      document.getElementById("clock-date").innerHTML = days[d.getDay()] + ", " + d.getDate() + " " + months[d.getMonth()];
+    }
+
+    document.getElementById("body-main").onclick = function(){
+      if(document.getElementById("clock").style.opacity == 0){
+        document.getElementById("clock").style.opacity = 1;
+      }else{
+        document.getElementById("clock").style.opacity = 0;
+      }
+    }
+
+    document.body.onload = function(){
+      var filter, selected;
+      if(window.innerHeight > window.innerWidth){
+        filter = "Mobile"; //portrait
+      }else{
+        filter = "Desktop"; //landscape
+      }
+
+      updateTime();
+
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var data = JSON.parse(this.responseText);
+          var posts = data.data.children;
+          var eligible = [];
+          for(var i=0;i<posts.length;i++){
+            if(posts[i].data.sticked == true) continue;
+            if(posts[i].data.link_flair_text == filter) eligible.push(posts[i].data);
+          }
+
+          //rng
+          selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
+          var imgUri = selected.url;
+
+          var imgObj = document.createElement("img");
+          imgObj.src = imgUri;
+          imgObj.className = "background-image";
+
+          imgObj.onload = function(){
+            console.log("Loaded");
+            imgObj.style.opacity = 1;
+            document.getElementById("sauce-title").innerHTML = selected.title;
+          }
+
+          imgObj.onerror = function(){
+            selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
+            imgObj.src = selected.url;
+          }
+
+          document.getElementById("body-main").appendChild(imgObj);
+        }
+      };
+      xhttp.open("GET", "https://www.reddit.com/r/animewallpaper.json", true);
+      xhttp.send();
+    }
+  </script>
+</html>
