@@ -92,6 +92,44 @@
   <script>
     var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dev"]
+    var mobile = [
+      "https://i.imgur.com/7RpfUnb.jpg",
+      "https://i.imgur.com/dNNgq2o.jpg",
+      "https://i.imgur.com/eWdCv3C.jpg",
+      "https://i.imgur.com/ivAYYN9.jpg",
+      "https://i.imgur.com/PAA9vFS.jpg",
+      "https://i.imgur.com/q1bpbtX.jpg",
+      "https://i.imgur.com/LYrOQS1.jpg",
+      "https://i.imgur.com/GF9E6MF.jpg",
+      "https://i.imgur.com/k9VNCcv.jpg",
+      "https://i.imgur.com/H84Ptiy.jpg",
+      "https://i.imgur.com/v2qnZX4.jpg",
+      "https://i.imgur.com/xoYyO4K.jpg",
+      "https://i.imgur.com/wgSEwJX.jpg",
+      "https://i.imgur.com/pydCF3s.jpg",
+      "https://i.imgur.com/I6utXLe.jpg",
+      "https://i.imgur.com/EkFl93w.jpg",
+      "https://i.imgur.com/5x7wKCY.jpg"
+    ];
+
+    var desktop = [
+      "https://i.imgur.com/PmtlqOw.jpg",
+      "https://i.imgur.com/jBSpVa6.jpg",
+      "https://i.redd.it/hj5uubu416r11.jpg",
+      "https://i.redd.it/dkirn2d2v3yy.jpg",
+      "https://i.redd.it/op57qy4a88k11.jpg",
+      "https://cdn.awwni.me/116s2.jpg",
+      "https://i.redd.it/datpn7ncqcv11.jpg",
+      "https://i.imgur.com/B0lThgG.jpg",
+      "https://i.imgur.com/w3IMYOP.jpg",
+      "https://i.imgur.com/kD9kKqr.jpg",
+      "https://i.imgur.com/X2vgXhO.jpg",
+      "https://i.imgur.com/dRF9nIr.jpg",
+      "https://i.imgur.com/ggr0Q2T.jpg",
+      "https://i.imgur.com/TuBjaln.jpg",
+      "https://i.imgur.com/Q2mzLGi.jpg",
+      "https://i.imgur.com/ld5s5we.jpg"
+    ];
 
     function updateTime(){
       var d = new Date();
@@ -113,11 +151,13 @@
     }
 
     document.body.onload = function(){
-      var filter, selected;
+      var filter, selected, fallback;
       if(window.innerHeight > window.innerWidth){
         filter = "Mobile"; //portrait
+        fallback = mobile;
       }else{
         filter = "Desktop"; //landscape
+        fallback = desktop;
       }
 
       updateTime();
@@ -150,6 +190,23 @@
           imgObj.onerror = function(){
             selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
             imgObj.src = selected.url;
+          }
+
+          document.getElementById("body-main").appendChild(imgObj);
+        }else if(this.readyState == 4){
+          //error, fallback
+          var imgObj = document.createElement("img");
+          imgObj.src = fallback[Math.round(Math.random() * (fallback.length - 1))];;
+          imgObj.className = "background-image";
+
+          imgObj.onload = function(){
+            console.log("Loaded");
+            imgObj.style.opacity = 1;
+            document.getElementById("sauce-title").style.display = "none";
+          }
+
+          imgObj.onerror = function(){
+            imgObj.src = fallback[Math.round(Math.random() * (fallback.length - 1))];
           }
 
           document.getElementById("body-main").appendChild(imgObj);
