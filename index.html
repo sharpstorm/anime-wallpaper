@@ -130,6 +130,8 @@
       "https://i.imgur.com/Q2mzLGi.jpg",
       "https://i.imgur.com/ld5s5we.jpg"
     ];
+    
+    var nsfwMode = 0; //safe mode [0 = safe, 1 = FFA, 2 = Lewds only (Shame on you)]
 
     function updateTime(){
       var d = new Date();
@@ -170,7 +172,7 @@
           var eligible = [];
           for(var i=0;i<posts.length;i++){
             if(posts[i].data.sticked == true) continue;
-            if(posts[i].data.link_flair_text == filter) eligible.push(posts[i].data);
+            if(posts[i].data.link_flair_text == filter && ((posts[i].data.over_18 && nsfwMode > 0) || (!posts[i].data.over_18 && nsfwMode < 2))) eligible.push(posts[i].data);
           }
 
           //rng
