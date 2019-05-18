@@ -25,6 +25,7 @@
       body{
         margin:0;
         padding:0;
+        font-family: Helvetica;
       }
 
       #clock{
@@ -44,6 +45,21 @@
         transition: opacity 0.5s;
       }
 
+      #sauce-win{
+        color: white;
+        position:absolute;
+        padding: 20px;
+        border-radius: 20px;
+        top: 50%;
+        margin-left: auto;
+        margin-right: auto;
+        left:0;
+        right:0;
+        width:50%;
+        background-color: rgba(0,0,0,0.8);
+        display: none;
+      }
+
       #clock-time{
         font-size: 10rem;
       }
@@ -60,7 +76,71 @@
         left: 2%;
         border-radius: 5px;
         padding: 10px;
-        font-family: Helvetica;
+      }
+
+      #nsfw-toggle{
+        background-color: rgba(0,0,0,0.8);
+        color: white;
+        position:absolute;
+        bottom: 2%;
+        right: 2%;
+        border-radius: 5px;
+        padding: 10px;
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 34px;
+        height: 20px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+
+      input:checked + .slider {
+        background-color: #2196F3;
+      }
+
+      input:checked + .slider:before {
+        -webkit-transform: translateX(13px);
+        -ms-transform: translateX(13px);
+        transform: translateX(13px);
+      }
+
+      /* Rounded sliders */
+      .slider.round {
+        border-radius: 34px;
+      }
+      .slider.round:before {
+        border-radius: 50%;
       }
 
       @media(max-width: 768px){
@@ -84,9 +164,18 @@
     <div id="sauce">
       <span id="sauce-title"></span>
     </div>
+    <div id="nsfw-toggle">
+      <span>NSFW</span>
+      <label class="switch">
+        <input id="cb-nsfw" type="checkbox">
+        <span class="slider round"></span>
+      </label>
+    </div>
     <div id="clock" style="opacity: 1;">
       <span id="clock-time">00:00</span><br/>
       <span id="clock-date">Monday, 5 Nov</span>
+    </div>
+    <div id="sauce-win">
     </div>
   </body>
   <script>
@@ -108,8 +197,7 @@
       "https://i.imgur.com/wgSEwJX.jpg",
       "https://i.imgur.com/pydCF3s.jpg",
       "https://i.imgur.com/I6utXLe.jpg",
-      "https://i.imgur.com/EkFl93w.jpg",
-      "https://i.imgur.com/5x7wKCY.jpg"
+      "https://i.imgur.com/EkFl93w.jpg"
     ];
 
     var desktop = [
@@ -127,10 +215,9 @@
       "https://i.imgur.com/dRF9nIr.jpg",
       "https://i.imgur.com/ggr0Q2T.jpg",
       "https://i.imgur.com/TuBjaln.jpg",
-      "https://i.imgur.com/Q2mzLGi.jpg",
-      "https://i.imgur.com/ld5s5we.jpg"
+      "https://i.imgur.com/Q2mzLGi.jpg"
     ];
-    
+
     var nsfwMode = 0; //safe mode [0 = safe, 1 = FFA, 2 = Lewds only (Shame on you)]
 
     function updateTime(){
@@ -153,6 +240,13 @@
     }
 
     document.body.onload = function(){
+      if(window.location.hash) {
+        if(window.location.hash.includes("nsfw")){
+          nsfwMode = 1;
+          document.getElementById("cb-nsfw").checked = true;
+        }
+      }
+
       var filter, selected, fallback;
       if(window.innerHeight > window.innerWidth){
         filter = "Mobile"; //portrait
@@ -163,6 +257,15 @@
       }
 
       updateTime();
+
+      document.getElementById("cb-nsfw").addEventListener("change", function(){
+        if(document.getElementById("cb-nsfw").checked){
+          window.location.hash = "nsfw";
+          window.location.reload();
+        }else{
+          window.location.hash = "";
+        }
+      });
 
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
@@ -175,26 +278,54 @@
             if(posts[i].data.link_flair_text == filter && ((posts[i].data.over_18 && nsfwMode > 0) || (!posts[i].data.over_18 && nsfwMode < 2))) eligible.push(posts[i].data);
           }
 
-          //rng
-          selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
-          var imgUri = selected.url;
-
-          var imgObj = document.createElement("img");
-          imgObj.src = imgUri;
-          imgObj.className = "background-image";
-
-          imgObj.onload = function(){
-            console.log("Loaded");
-            imgObj.style.opacity = 1;
-            document.getElementById("sauce-title").innerHTML = selected.title;
-          }
-
-          imgObj.onerror = function(){
+          if(window.location.hash.includes("list")){
+            document.getElementById("sauce").style.display = "none";
+            document.getElementById("sauce-win").style.display = "block";
+            for(var i=0;i<eligible.length;i++){
+              var row = document.createElement("div");
+              row.style.height = "10vh";
+              row.style.display = "flex";
+              var thumb = document.createElement("img");
+              thumb.src = eligible[i].thumbnail;
+              thumb.style.height = "100%";
+              row.appendChild(thumb);
+              row.setAttribute("data-url", eligible[i].url);
+              row.addEventListener("click", function(){
+                window.location = this.getAttribute("data-url");
+              });
+              var x = document.createElement("div");
+              x.style.display = "flex";
+              x.style.flexDirection = "column";
+              x.style.justifyContent = "center";
+              x.style.paddingLeft = "10px";
+              var title = document.createElement("span");
+              title.textContent = eligible[i].title;
+              x.appendChild(title);
+              row.appendChild(x);
+              document.getElementById("sauce-win").appendChild(row);
+            }
+          }else{
+            //rng
             selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
-            imgObj.src = selected.url;
-          }
+            var imgUri = selected.url;
 
-          document.getElementById("body-main").appendChild(imgObj);
+            var imgObj = document.createElement("img");
+            imgObj.src = imgUri;
+            imgObj.className = "background-image";
+
+            imgObj.onload = function(){
+              imgObj.style.opacity = 1;
+              document.getElementById("sauce-title").innerHTML = selected.title;
+            }
+
+            imgObj.onerror = function(){
+              selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
+              imgObj.src = selected.url;
+            }
+
+            document.getElementById("body-main").appendChild(imgObj);
+          }
+          
         }else if(this.readyState == 4){
           //error, fallback
           var imgObj = document.createElement("img");
@@ -202,7 +333,6 @@
           imgObj.className = "background-image";
 
           imgObj.onload = function(){
-            console.log("Loaded");
             imgObj.style.opacity = 1;
             document.getElementById("sauce-title").style.display = "none";
           }
