@@ -7,12 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     <style>
-      .background-image{
+      #background-image{
         object-fit: cover;
         opacity: 0;
         transition: opacity 1s;
         height:100%;
         width:100%;
+      }
+
+      #background-image.loaded {
+        opacity: 1;
       }
 
       #body-main{
@@ -23,9 +27,24 @@
       }
 
       body{
-        margin:0;
-        padding:0;
+        margin: 0;
+        padding: 0;
         font-family: Helvetica;
+      }
+
+      #app {
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+      }
+
+      #app.immersive > #clock {
+        opacity: 0;
+      }
+
+      #app.immersive > #info-button {
+        opacity: 0;
       }
 
       #clock{
@@ -35,14 +54,108 @@
         position:absolute;
         padding: 10px;
         top: 10%;
-        left:0;
-        right:0;
-        width:30%;
-        text-align:center;
+        left: 0;
+        right: 0;
+        width: 30%;
+        text-align: center;
         border-radius: 20px;
         margin-left: auto;
         margin-right: auto;
+        opacity: 1;
         transition: opacity 0.5s;
+      }
+
+      #clock-time{
+        font-size: min(10rem, 10vw);
+      }
+
+      #clock-date{
+        font-size: min(3rem, 3vw);
+      }
+
+      #info-button, #link-button, #nsfw-button {
+        color: white;
+        position:absolute;
+        width: 2em;
+        height: 2em;
+        border-radius: 50%;
+        padding: 2px;
+        margin-left: auto;
+        margin-right: auto;
+        bottom: 0.5em;
+        background-color: rgba(0,0,0,0.8);
+        transition: opacity 0.5s, transform 0.5s;
+      }
+
+      #info-button {
+        left: 0.5em;
+        opacity: 1;
+      }
+
+      #info-button > span {
+        width: 100%;
+        height: 100%;
+        content: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20width%3D%2224%22%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22M11%207h2v2h-2zm0%204h2v6h-2zm1-9C6.48%202%202%206.48%202%2012s4.48%2010%2010%2010%2010-4.48%2010-10S17.52%202%2012%202zm0%2018c-4.41%200-8-3.59-8-8s3.59-8%208-8%208%203.59%208%208-3.59%208-8%208z%22%2F%3E%3C%2Fsvg%3E');
+        display: inline-block;
+      }
+
+      #link-button {
+        right: 0.5em;
+        opacity: 0;
+      }
+
+      #link-button > span {
+        width: 100%;
+        height: 100%;
+        content: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20width%3D%2224%22%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22M3.9%2012c0-1.71%201.39-3.1%203.1-3.1h4V7H7c-2.76%200-5%202.24-5%205s2.24%205%205%205h4v-1.9H7c-1.71%200-3.1-1.39-3.1-3.1zM8%2013h8v-2H8v2zm9-6h-4v1.9h4c1.71%200%203.1%201.39%203.1%203.1s-1.39%203.1-3.1%203.1h-4V17h4c2.76%200%205-2.24%205-5s-2.24-5-5-5z%22%2F%3E%3C%2Fsvg%3E');
+        display: inline-block;
+      }
+
+      #nsfw-button {
+        right: 3em;
+        opacity: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      #nsfw-button > span {
+        font-size: 0.6em;
+        text-align: center;
+      }
+
+      #nsfw-button > span::before {
+        content: 'SAFE';
+      }
+
+      #nsfw-button.nsfw > span::before {
+        content: '18+';
+      }
+
+      #sauce-bar {
+        background-color: rgba(0,0,0,0.8);
+        width: 100%;
+        position:absolute;
+        bottom: 0;
+        height: 3em;
+        transform: translateY(100%);
+        transition: transform 0.5s;
+        color: #FFF;
+        padding: 4px;
+        text-align: center;
+      }
+
+      #app.show-sauce > #sauce-bar {
+        transform: translateY(0);
+      }
+
+      #app.show-sauce > #info-button {
+        transform: translateY(-3em);
+      }
+
+      #app.show-sauce > #link-button, #app.show-sauce > #nsfw-button {
+        opacity: 1;
+        transform: translateY(-3em);
       }
 
       #sauce-win{
@@ -60,24 +173,6 @@
         display: none;
       }
 
-      #clock-time{
-        font-size: 10rem;
-      }
-
-      #clock-date{
-        font-size: 3rem;
-      }
-
-      #sauce{
-        background-color: rgba(0,0,0,0.8);
-        color: white;
-        position:absolute;
-        bottom: 2%;
-        left: 2%;
-        border-radius: 5px;
-        padding: 10px;
-      }
-
       #nsfw-toggle{
         background-color: rgba(0,0,0,0.8);
         color: white;
@@ -86,61 +181,6 @@
         right: 2%;
         border-radius: 5px;
         padding: 10px;
-      }
-
-      .switch {
-        position: relative;
-        display: inline-block;
-        width: 34px;
-        height: 20px;
-      }
-
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        -webkit-transition: .4s;
-        transition: .4s;
-      }
-
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 16px;
-        width: 16px;
-        left: 2px;
-        bottom: 2px;
-        background-color: white;
-        -webkit-transition: .4s;
-        transition: .4s;
-      }
-
-      input:checked + .slider {
-        background-color: #2196F3;
-      }
-
-      input:checked + .slider:before {
-        -webkit-transform: translateX(13px);
-        -ms-transform: translateX(13px);
-        transform: translateX(13px);
-      }
-
-      /* Rounded sliders */
-      .slider.round {
-        border-radius: 34px;
-      }
-      .slider.round:before {
-        border-radius: 50%;
       }
 
       @media(max-width: 768px){
@@ -159,23 +199,28 @@
     </style>
   </head>
   <body>
-    <div id="body-main">
-    </div>
-    <div id="sauce">
-      <span id="sauce-title"></span>
-    </div>
-    <div id="nsfw-toggle">
-      <span>NSFW</span>
-      <label class="switch">
-        <input id="cb-nsfw" type="checkbox">
-        <span class="slider round"></span>
-      </label>
-    </div>
-    <div id="clock" style="opacity: 1;">
-      <span id="clock-time">00:00</span><br/>
-      <span id="clock-date">Monday, 5 Nov</span>
-    </div>
-    <div id="sauce-win">
+    <div id="app">
+      <div id="body-main">
+        <img id="background-image" />
+      </div>
+      <div id="info-button">
+        <span></span>
+      </div>
+      <div id="link-button">
+        <span></span>
+      </div>
+      <div id="nsfw-button">
+        <span></span>
+      </div>
+      <div id="clock">
+        <span id="clock-time">00:00</span><br/>
+        <span id="clock-date">Monday, 5 Nov</span>
+      </div>
+      <div id="sauce-bar">
+        <span id="sauce-title"></span>
+      </div>
+      <div id="sauce-win">
+      </div>
     </div>
   </body>
   <script>
@@ -188,7 +233,16 @@
       "https://i.imgur.com/ivAYYN9.jpg",
       "https://i.imgur.com/PAA9vFS.jpg",
       "https://i.imgur.com/q1bpbtX.jpg",
-      "https://i.imgur.com/LYrOQS1.jpg"
+      "https://i.imgur.com/LYrOQS1.jpg",
+      "https://i.imgur.com/GF9E6MF.jpg",
+      "https://i.imgur.com/k9VNCcv.jpg",
+      "https://i.imgur.com/H84Ptiy.jpg",
+      "https://i.imgur.com/v2qnZX4.jpg",
+      "https://i.imgur.com/xoYyO4K.jpg",
+      "https://i.imgur.com/wgSEwJX.jpg",
+      "https://i.imgur.com/pydCF3s.jpg",
+      "https://i.imgur.com/I6utXLe.jpg",
+      "https://i.imgur.com/EkFl93w.jpg"
     ];
 
     var desktop = [
@@ -198,35 +252,71 @@
       "https://i.redd.it/dkirn2d2v3yy.jpg",
       "https://i.redd.it/op57qy4a88k11.jpg",
       "https://cdn.awwni.me/116s2.jpg",
-      "https://i.redd.it/datpn7ncqcv11.jpg"
+      "https://i.redd.it/datpn7ncqcv11.jpg",
+      "https://i.imgur.com/B0lThgG.jpg",
+      "https://i.imgur.com/w3IMYOP.jpg",
+      "https://i.imgur.com/kD9kKqr.jpg",
+      "https://i.imgur.com/X2vgXhO.jpg",
+      "https://i.imgur.com/dRF9nIr.jpg",
+      "https://i.imgur.com/ggr0Q2T.jpg",
+      "https://i.imgur.com/TuBjaln.jpg",
+      "https://i.imgur.com/Q2mzLGi.jpg"
     ];
 
-    var nsfwMode = 0; //safe mode [0 = safe, 1 = FFA, 2 = Lewds only (Shame on you)]
+    var nsfwMode = 0; //safe mode [0 = safe, 1 = All, 2 = Lewds only]
 
-    function updateTime(){
+    function updateTime() {
       var d = new Date();
       updateDate(d);
-      document.getElementById("clock-time").innerHTML = (d.getHours() < 10 ? "0" + d.getHours() : d.getHours()) + ":" + (d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes());
+      document.getElementById("clock-time").textContent = (d.getHours() < 10 ? "0" + d.getHours() : d.getHours()) + ":" + (d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes());
       setTimeout(updateTime, 5000);
     }
 
-    function updateDate(d){
-      document.getElementById("clock-date").innerHTML = days[d.getDay()] + ", " + d.getDate() + " " + months[d.getMonth()];
+    function updateDate(d) {
+      document.getElementById("clock-date").textContent = days[d.getDay()] + ", " + d.getDate() + " " + months[d.getMonth()];
     }
 
-    document.getElementById("body-main").onclick = function(){
-      if(document.getElementById("clock").style.opacity == 0){
-        document.getElementById("clock").style.opacity = 1;
-      }else{
-        document.getElementById("clock").style.opacity = 0;
+    document.getElementById('body-main').onclick = function() {
+      toggleClass(document.getElementById('app'), 'immersive');
+    }
+
+    document.getElementById('info-button').onclick = function() {
+      if(document.getElementById('app').classList.contains('immersive')) return;
+      toggleClass(document.getElementById('app'), 'show-sauce');
+    }
+
+    document.getElementById('nsfw-button').onclick = function() {
+      if(document.getElementById('app').classList.contains('immersive')) return;
+      if(nsfwMode === 0){
+        nsfwMode = 1;
+        document.getElementById('nsfw-button').classList.add('nsfw');
+        window.location.hash = '#nsfw';
+        window.location.reload();
+      }else if(nsfwMode === 1){
+        nsfwMode = 0;
+        document.getElementById('nsfw-button').classList.remove('nsfw');
+        window.location.hash = '';
+        window.location.reload();
+      }
+    }
+
+    document.getElementById('link-button').onclick = function() {
+      if(document.getElementById('app').classList.contains('immersive')) return;
+      if(!document.getElementById('app').classList.contains('show-sauce')) return;
+      
+      if(document.getElementById('background-image').getAttribute('data-permalink') !== ''){
+        window.open(document.getElementById('background-image').getAttribute('data-permalink'), '_blank');
       }
     }
 
     document.body.onload = function(){
       if(window.location.hash) {
-        if(window.location.hash.includes("nsfw")){
+        if(window.location.hash.includes('nsfwonly')){
+          nsfwMode = 2;
+          document.getElementById('nsfw-button').classList.add('nsfw');
+        }else if(window.location.hash.includes('nsfw')){
           nsfwMode = 1;
-          document.getElementById("cb-nsfw").checked = true;
+          document.getElementById('nsfw-button').classList.add('nsfw');
         }
       }
 
@@ -241,94 +331,64 @@
 
       updateTime();
 
-      document.getElementById("cb-nsfw").addEventListener("change", function(){
-        if(document.getElementById("cb-nsfw").checked){
-          window.location.hash = "nsfw";
-          window.location.reload();
-        }else{
-          window.location.hash = "";
+      httpRequest('https://www.reddit.com/r/animewallpaper.json', function(res) {
+        var data = JSON.parse(res);
+        var posts = data.data.children;
+        var eligible = [];
+        for(var i=0;i<posts.length;i++){
+          if(posts[i].data.sticked == true) continue;
+          if(posts[i].data.link_flair_text == filter && ((posts[i].data.over_18 && nsfwMode > 0) || (!posts[i].data.over_18 && nsfwMode < 2))) eligible.push(posts[i].data);
         }
-      });
 
+        selectBackground(eligible);
+      }, function() {
+        selectBackground(fallback);
+      });
+    }
+
+    function selectBackground(eligible) {
+      //rng
+      var selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
+      displayBackground(selected, function() {
+        selectBackground(eligible);
+      });
+    }
+
+    function displayBackground(selected, failure) {
+      var imgObj = document.getElementById('background-image');
+
+      imgObj.onload = function(){
+        imgObj.classList.add('loaded')
+        document.getElementById('sauce-title').textContent = selected.title;
+        imgObj.setAttribute('data-permalink', 'https://www.reddit.com' + selected.permalink);
+      }
+
+      imgObj.onerror = function(){
+        failure();
+      }
+
+      imgObj.src = selected.url;
+    }
+
+    function httpRequest(url, success, error) {
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-          var data = JSON.parse(this.responseText);
-          var posts = data.data.children;
-          var eligible = [];
-          for(var i=0;i<posts.length;i++){
-            if(posts[i].data.sticked == true) continue;
-            if(posts[i].data.link_flair_text == filter && ((posts[i].data.over_18 && nsfwMode > 0) || (!posts[i].data.over_18 && nsfwMode < 2))) eligible.push(posts[i].data);
-          }
-
-          if(window.location.hash.includes("list")){
-            document.getElementById("sauce").style.display = "none";
-            document.getElementById("sauce-win").style.display = "block";
-            for(var i=0;i<eligible.length;i++){
-              var row = document.createElement("div");
-              row.style.height = "10vh";
-              row.style.display = "flex";
-              var thumb = document.createElement("img");
-              thumb.src = eligible[i].thumbnail;
-              thumb.style.height = "100%";
-              row.appendChild(thumb);
-              row.setAttribute("data-url", eligible[i].url);
-              row.addEventListener("click", function(){
-                window.location = this.getAttribute("data-url");
-              });
-              var x = document.createElement("div");
-              x.style.display = "flex";
-              x.style.flexDirection = "column";
-              x.style.justifyContent = "center";
-              x.style.paddingLeft = "10px";
-              var title = document.createElement("span");
-              title.textContent = eligible[i].title;
-              x.appendChild(title);
-              row.appendChild(x);
-              document.getElementById("sauce-win").appendChild(row);
-            }
-          }else{
-            //rng
-            selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
-            var imgUri = selected.url;
-
-            var imgObj = document.createElement("img");
-            imgObj.src = imgUri;
-            imgObj.className = "background-image";
-
-            imgObj.onload = function(){
-              imgObj.style.opacity = 1;
-              document.getElementById("sauce-title").innerHTML = selected.title;
-            }
-
-            imgObj.onerror = function(){
-              selected = eligible[Math.round(Math.random() * (eligible.length - 1))];
-              imgObj.src = selected.url;
-            }
-
-            document.getElementById("body-main").appendChild(imgObj);
-          }
-          
-        }else if(this.readyState == 4){
-          //error, fallback
-          var imgObj = document.createElement("img");
-          imgObj.src = fallback[Math.round(Math.random() * (fallback.length - 1))];;
-          imgObj.className = "background-image";
-
-          imgObj.onload = function(){
-            imgObj.style.opacity = 1;
-            document.getElementById("sauce-title").style.display = "none";
-          }
-
-          imgObj.onerror = function(){
-            imgObj.src = fallback[Math.round(Math.random() * (fallback.length - 1))];
-          }
-
-          document.getElementById("body-main").appendChild(imgObj);
+          success(this.responseText);
+        } else if(this.readyState == 4) {
+          error();
         }
       };
-      xhttp.open("GET", "https://www.reddit.com/r/animewallpaper.json", true);
+      xhttp.open("GET", url, true);
       xhttp.send();
+    }
+
+    function toggleClass(element, className) {
+      if(element.classList.contains(className)){
+        element.classList.remove(className);
+      }else{
+        element.classList.add(className);
+      }
     }
   </script>
 </html>
